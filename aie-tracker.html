@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>🚀 AIE Tracker — Robotesta</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0F172A;color:#E2E8F0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:520px;margin:0 auto;-webkit-tap-highlight-color:transparent}
+input,textarea,select{outline:none;font-family:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+const TABS = ["Hit List", "Investors", "Government", "Accelerators", "Media", "Leads"];
+const TEAM = ["All", "Sameh", "Khadiga", "Alen", "Ahmed", "Ann", "Noha"];
+
+const HIGH_TARGETS = [
+  { id: "h1", company: "Microsoft Egypt", booth: "H1-A10", cat: "Global Enterprise", assigned: "Sameh", why: "GM Mohamed El Kassem - key partnership + customer" },
+  { id: "h2", company: "Amazon (AWS)", booth: "Sponsor", cat: "Global Enterprise", assigned: "Alen", why: "DevOps ecosystem, massive dev teams" },
+  { id: "h3", company: "Cisco", booth: "H1-B10", cat: "Global Enterprise", assigned: "Alen", why: "Enterprise networking - large dev org" },
+  { id: "h4", company: "Red Hat", booth: "H1-B30", cat: "Global Enterprise", assigned: "Alen", why: "Open source leader - CI/CD ecosystem fit" },
+  { id: "h5", company: "HPE", booth: "H1-E40", cat: "Global Enterprise", assigned: "Alen", why: "Enterprise tech - large dev teams" },
+  { id: "h6", company: "Capgemini", booth: "Sponsor", cat: "Global Enterprise", assigned: "Khadiga", why: "Consulting giant - channel partner for QA" },
+  { id: "h7", company: "Dataiku AI", booth: "H1-115", cat: "Global Enterprise", assigned: "Alen", why: "AI platform - engineering-heavy" },
+  { id: "h8", company: "Odoo Middle East", booth: "H1-B50", cat: "Global Enterprise", assigned: "Khadiga", why: "Open-source ERP - massive dev community" },
+  { id: "h9", company: "Zoho", booth: "H1-A15", cat: "Global Enterprise", assigned: "Khadiga", why: "15K+ engineers, 50+ SaaS apps. IDEAL" },
+  { id: "h10", company: "ManageEngine", booth: "H1-F10", cat: "Global Enterprise", assigned: "Khadiga", why: "90+ IT products. Pure product company" },
+  { id: "h11", company: "e& Egypt (Etisalat)", booth: "H1-F50", cat: "Telco Enterprise", assigned: "Sameh", why: "Major telco with dev teams. Anchor customer" },
+  { id: "h12", company: "Link Development", booth: "H1-A10", cat: "Regional SI", assigned: "Khadiga", why: "480+ devs, MS/AWS partner, 24 countries" },
+  { id: "h13", company: "Brightskies", booth: "H1-A55", cat: "Regional SI", assigned: "Khadiga", why: "450 engineers, embedded/automotive software" },
+  { id: "h14", company: "Alkan CIT", booth: "H1-C70", cat: "Regional SI", assigned: "Khadiga", why: "1000+ employees, builds custom solutions" },
+  { id: "h15", company: "BARQ Systems", booth: "H1-A40", cat: "Regional SI", assigned: "Alen", why: "Egyptian SI - digital transformation" },
+  { id: "h16", company: "CONNECT-PS", booth: "H1-B70", cat: "Regional SI", assigned: "Khadiga", why: "Product builder, dev teams" },
+  { id: "h17", company: "HITS Technologies", booth: "H1-A65", cat: "Regional SI", assigned: "Khadiga", why: "Egyptian tech, product builder" },
+  { id: "h18", company: "I-SYS", booth: "H1-B60", cat: "Regional SI", assigned: "Khadiga", why: "Egyptian IT solutions - builds systems" },
+  { id: "h19", company: "ITECORP", booth: "H1-A10", cat: "Regional SI", assigned: "Khadiga", why: "MS partner 35yr - dev team, AI services" },
+  { id: "h20", company: "Goldman Solutions", booth: "H1-108", cat: "Software Co", assigned: "Khadiga", why: "Custom software dev - potential customer" },
+  { id: "h21", company: "novomind MEA", booth: "H1-109", cat: "Software Co", assigned: "Khadiga", why: "German AI CX - has dev team" },
+  { id: "h22", company: "DeepSource Technologies", booth: "H1-105", cat: "Software Co", assigned: "Khadiga", why: "German IT services - dev teams" },
+  { id: "h23", company: "ZenHR", booth: "H1-106", cat: "HR Tech Product", assigned: "Khadiga", why: "SaaS HR platform - dev team building product" },
+  { id: "h24", company: "RASPIRE", booth: "H1-P169", cat: "Cybersecurity", assigned: "Alen", why: "Cybersecurity product company" },
+  { id: "h25", company: "NexGuards", booth: "H1-P173", cat: "Cybersecurity", assigned: "Alen", why: "Cybersecurity product company" },
+  { id: "h26", company: "Simulations Labs", booth: "H1-P017", cat: "Cybersecurity", assigned: "Alen", why: "Testing simulation product" },
+  { id: "h27", company: "NTG Clarity", booth: "H1-A04", cat: "⚠️ COMPETITOR", assigned: "Sameh", why: "Has TestFlair QA product - MUST SCOUT" },
+  { id: "h28", company: "Inspect Via Me", booth: "H1-P163", cat: "⚠️ COMPETITOR", assigned: "Sameh", why: "AI QA testing platform - DIRECT COMPETITOR" },
+  { id: "h29", company: "MCIT / ITIDA", booth: "H1-C60", cat: "Government", assigned: "Sameh", why: "Grants, programs, national AI strategy" },
+  { id: "h30", company: "Edafa VC", booth: "H1-P322–P326", cat: "Investor", assigned: "Sameh", why: "🔥 Saudi VC - must pitch for $500K pre-seed" },
+  { id: "h31", company: "Startup Gate", booth: "H1-P284", cat: "Ecosystem", assigned: "Ahmed", why: "Investor & accelerator intros" },
+  { id: "h32", company: "Tactful AI", booth: "H1-P101", cat: "AI Product", assigned: "Ann", why: "AI CX platform - $5M+, dev team Cairo+Cambridge" },
+  { id: "h33", company: "Widebot AI", booth: "Sponsor", cat: "AI Product", assigned: "Ann", why: "Arabic AI, $3.9M rev, 87 employees, 350+ clients" },
+  { id: "h34", company: "THΔKΔA", booth: "H1-C20", cat: "AI Product", assigned: "Ann", why: "AI decision intelligence - sponsor = resources" },
+  { id: "h35", company: "Wittify AI", booth: "H1-A52", cat: "AI Product", assigned: "Ann", why: "Enterprise conversational AI platform" },
+  { id: "h36", company: "Amira AI", booth: "H1-A25", cat: "AI Product", assigned: "Ann", why: "AI sales/CS, 150+ clients (Audi, Vodafone)" },
+  { id: "h37", company: "ZIWO", booth: "H1-C40", cat: "AI Product", assigned: "Ann", why: "Cloud contact center platform, since 2011" },
+  { id: "h38", company: "Appgain.io", booth: "H1-P083", cat: "AI Product", assigned: "Ann", why: "Mobile marketing SaaS - dev team" },
+  { id: "h39", company: "AutoPM", booth: "H1-P003", cat: "AI Product", assigned: "Ann", why: "AI project manager - DevOps adjacent!" },
+  { id: "h40", company: "DEV-O", booth: "H1-P021", cat: "AI Product", assigned: "Ann", why: "DevOps AI tool - VERY relevant to QA" },
+  { id: "h41", company: "DATAGENX", booth: "H1-P027", cat: "AI Product", assigned: "Ann", why: "AI agent for data engineers" },
+  { id: "h42", company: "DevisionX", booth: "H1-P029", cat: "AI Product", assigned: "Ann", why: "Computer vision platform - dev team" },
+  { id: "h43", company: "Valify Solutions", booth: "H1-P207", cat: "AI Product", assigned: "Ann", why: "Digital identity SaaS - dev team" },
+  { id: "h44", company: "AIM Technologies", booth: "H1-P159", cat: "AI Product", assigned: "Ann", why: "AI analytics platform" },
+  { id: "h45", company: "Comply.Now", booth: "H1-P253", cat: "AI Product", assigned: "Ann", why: "Compliance SaaS - dev team" },
+  { id: "h46", company: "Freshworks", booth: "H1-G01", cat: "Software Co", assigned: "Khadiga", why: "CRM/ITSM platform - dev teams" },
+  { id: "h47", company: "TechnoWelle", booth: "H1-P225", cat: "⚠️ COMPETITOR", assigned: "Sameh", why: "Automotive testing automation. Adjacent" },
+];
+
+const INVESTORS = [
+  { id: "i1", company: "Edafa Venture Capital", loc: "Booth H1-P322–P326", tier: "T1", type: "VC Fund", action: "Full pitch Day 1 AM. One-pager + deck ready" },
+  { id: "i2", company: "World Bank", loc: "Main Stage / Lounge", tier: "T1", type: "DFI Speaker", action: "Attend session → approach speaker → ask SME fund" },
+  { id: "i3", company: "EBRD", loc: "Main Stage / Lounge", tier: "T1", type: "DFI Speaker", action: "Ask about Star Venture programme" },
+  { id: "i4", company: "UNDP", loc: "Main Stage / Lounge", tier: "T1", type: "UN Agency", action: "Frame as AI for software quality" },
+  { id: "i5", company: "Algebra Ventures", loc: "Floor (expected)", tier: "T2", type: "Egypt VC", action: "Cold approach. 'Supernova semi-finalist'" },
+  { id: "i6", company: "Sawari Ventures", loc: "Floor (expected)", tier: "T2", type: "Egypt VC", action: "Look for team on floor" },
+  { id: "i7", company: "A15 / Link Dev", loc: "Ask at H1-A10", tier: "T2", type: "VC / SI", action: "Ask Link Dev booth if A15 partners present" },
+  { id: "i8", company: "Endure Capital", loc: "Floor (expected)", tier: "T2", type: "Egypt VC", action: "Priority! Right ticket size for pre-seed" },
+  { id: "i9", company: "Cairo Angels", loc: "Ask Startup Gate", tier: "T2", type: "Angel Network", action: "Ask Startup Gate for intro" },
+  { id: "i10", company: "Flat6Labs", loc: "Floor (expected)", tier: "T2", type: "Accelerator/VC", action: "Ask about next Cairo cohort" },
+  { id: "i11", company: "Disruptech Ventures", loc: "Floor (expected)", tier: "T2", type: "Egypt VC", action: "Enterprise SaaS focus = alignment" },
+  { id: "i12", company: "500 Global MENA", loc: "Floor (expected)", tier: "T3", type: "Global VC", action: "Find scouts at startup zone" },
+  { id: "i13", company: "Shorooq Partners", loc: "Floor (expected)", tier: "T3", type: "UAE VC", action: "Cold approach if spotted" },
+  { id: "i14", company: "Masabeeh Partners", loc: "Floor (expected)", tier: "T3", type: "Saudi VC", action: "Warm lead! Follow up in person" },
+  { id: "i15", company: "Supernova Judges", loc: "Supernova Stage", tier: "T4", type: "Judges", action: "Approach ALL judges after pitch" },
+  { id: "i16", company: "Investor Programme", loc: "Investor Lounge", tier: "T4", type: "Mixed VCs", action: "Register for 1-on-1 slots" },
+];
+
+const GOVT = [
+  { id: "g1", company: "MCIT / ITIDA", loc: "Booth H1-C60", action: "Ask: export support, iTech grants, startup incentives", owner: "Sameh" },
+  { id: "g2", company: "UAE Cybersecurity Council", loc: "Booth H1-F60", action: "UAE govt procurement for QA tools", owner: "Ahmed" },
+  { id: "g3", company: "World Bank Group", loc: "Main Stage", action: "Attend session → SME Innovation Fund", owner: "Ahmed" },
+  { id: "g4", company: "EBRD", loc: "Main Stage", action: "Star Venture programme eligibility", owner: "Ahmed" },
+  { id: "g5", company: "UNDP", loc: "Main Stage", action: "Innovation Fund, SDG AI initiatives", owner: "Sameh" },
+  { id: "g6", company: "TIEC", loc: "Ask at ITIDA booth", action: "Incubation + seed funding up to EGP 500K", owner: "Ahmed" },
+];
+
+const ACCELS = [
+  { id: "a1", company: "Startup Gate", loc: "Booth H1-P284", inv: "Connector", action: "Day 1 AM: 'Which accelerators are here?'" },
+  { id: "a2", company: "Edafa VC", loc: "Booth H1-P322", inv: "$100K-$500K", action: "Full pitch + ask about accelerator program" },
+  { id: "a3", company: "Flat6Labs Cairo", loc: "Expected", inv: "$100K-$150K", action: "Priority! Ask about next cohort timeline" },
+  { id: "a4", company: "TIEC", loc: "Ask ITIDA", inv: "Up to EGP 500K", action: "Government incubation + seed funding" },
+  { id: "a5", company: "Falak Startups", loc: "Expected", inv: "$50K-$100K", action: "B2B SaaS focus = perfect alignment" },
+  { id: "a6", company: "500 Global MENA", loc: "Expected", inv: "$150K", action: "Look for scouts at startup zone" },
+  { id: "a7", company: "Plug and Play MENA", loc: "Expected", inv: "Up to $500K", action: "Corporate partners = customer intros" },
+  { id: "a8", company: "Hub71 (Abu Dhabi)", loc: "Ask Startup Gate", inv: "Up to $500K", action: "Free office + equity-free funding" },
+];
+
+const MEDIA = [
+  { id: "m1", company: "AraGeek", loc: "At event", reach: "2M+ monthly", action: "🔥 Find Day 1 AM → lock interview slot", status: "Warm lead" },
+  { id: "m2", company: "Event Official Media", loc: "Media Center", reach: "Event channels", action: "Submit press release + register", status: "To do" },
+  { id: "m3", company: "Wamda", loc: "Expected", reach: "500K+ MENA", action: "Pitch: Egyptian AI in Supernova", status: "To find" },
+  { id: "m4", company: "Entrepreneur ME", loc: "Expected", reach: "200K+ GCC", action: "Pitch: 15-year QA vet builds AI", status: "To find" },
+  { id: "m5", company: "ITP.net", loc: "Expected", reach: "MENA IT leaders", action: "Pitch: GitHub Copilot for QA", status: "To find" },
+];
+
+const TIER_COLORS = { T1: "#DC2626", T2: "#EA580C", T3: "#7C3AED", T4: "#2563EB" };
+
+const LS = {
+  get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+};
+
+function App() {
+  const [tab, setTab] = useState(0);
+  const [filter, setFilter] = useState("All");
+  const [done, setDone] = useState(() => LS.get("aie-done", {}));
+  const [notes, setNotes] = useState(() => LS.get("aie-notes", {}));
+  const [leads, setLeads] = useState(() => LS.get("aie-leads", []));
+  const [expandedId, setExpandedId] = useState(null);
+  const [leadForm, setLeadForm] = useState({ name: "", company: "", role: "", email: "", segment: "Enterprise", next: "" });
+  const [search, setSearch] = useState("");
+
+  const saveDone = (d) => { setDone(d); LS.set("aie-done", d); };
+  const saveNotes = (n) => { setNotes(n); LS.set("aie-notes", n); };
+  const saveLeads = (l) => { setLeads(l); LS.set("aie-leads", l); };
+
+  const toggleDone = (id) => saveDone({ ...done, [id]: !done[id] });
+  const updateNote = (id, text) => saveNotes({ ...notes, [id]: text });
+
+  const addLead = () => {
+    if (!leadForm.name || !leadForm.company) return;
+    const nl = [...leads, { ...leadForm, id: "lead-" + Date.now(), time: new Date().toLocaleTimeString() }];
+    saveLeads(nl);
+    setLeadForm({ name: "", company: "", role: "", email: "", segment: "Enterprise", next: "" });
+  };
+  const removeLead = (id) => saveLeads(leads.filter(l => l.id !== id));
+
+  const allItems = [...HIGH_TARGETS.map(h=>h.id),...INVESTORS.map(i=>i.id),...GOVT.map(g=>g.id),...ACCELS.map(a=>a.id),...MEDIA.map(m=>m.id)];
+  const doneCount = allItems.filter(id=>done[id]).length;
+  const totalCount = allItems.length;
+
+  const hitFiltered = HIGH_TARGETS.filter(h =>
+    (filter === "All" || h.assigned === filter) &&
+    (!search || h.company.toLowerCase().includes(search.toLowerCase()) || h.booth.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const Card = ({ id, title, subtitle, badges, detail, actionText }) => {
+    const isDone = done[id];
+    const isExp = expandedId === id;
+    return (
+      <div style={{ background: isDone ? "#0F2A1F" : "#0F172A", borderRadius: 10, marginBottom: 6, border: `1px solid ${isDone ? "#166534" : "#334155"}`, overflow: "hidden", opacity: isDone ? 0.7 : 1 }}>
+        <div style={{ display: "flex", alignItems: "center", padding: "10px 12px", gap: 10, cursor: "pointer" }} onClick={() => setExpandedId(isExp ? null : id)}>
+          <button onClick={e => { e.stopPropagation(); toggleDone(id); }} style={{
+            width: 28, height: 28, borderRadius: 8, border: `2px solid ${isDone ? "#22C55E" : "#475569"}`, background: isDone ? "#22C55E" : "transparent",
+            color: "#fff", fontSize: 14, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center"
+          }}>{isDone ? "✓" : ""}</button>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: isDone ? "#86EFAC" : "#F1F5F9", textDecoration: isDone ? "line-through" : "none" }}>{title}</div>
+            {subtitle && <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 2 }}>{subtitle}</div>}
+            <div style={{ display: "flex", gap: 5, marginTop: 3, flexWrap: "wrap" }}>
+              {badges.map((b, i) => <span key={i} style={{ fontSize: 10, padding: "2px 6px", borderRadius: 4, ...b.style }}>{b.text}</span>)}
+            </div>
+          </div>
+          <span style={{ color: "#475569", fontSize: 14 }}>{isExp ? "▲" : "▼"}</span>
+        </div>
+        {isExp && (
+          <div style={{ padding: "0 12px 12px" }}>
+            {detail && <div style={{ fontSize: 12, color: "#94A3B8", marginBottom: 6, lineHeight: 1.4 }}>{detail}</div>}
+            {actionText && <div style={{ fontSize: 12, color: "#FCD34D", marginBottom: 8 }}>📋 {actionText}</div>}
+            <textarea placeholder="Add notes..." value={notes[id] || ""} onChange={e => updateNote(id, e.target.value)}
+              style={{ width: "100%", padding: 8, background: "#0F172A", border: "1px solid #334155", borderRadius: 6, color: "#E2E8F0", fontSize: 13, minHeight: 60, resize: "vertical", boxSizing: "border-box" }}
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      {/* Header */}
+      <div style={{ background: "linear-gradient(135deg, #1E3A8A, #7C3AED)", padding: "16px 16px 12px", position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>🚀 AIE Tracker</div>
+            <div style={{ fontSize: 11, color: "#C4B5FD" }}>Feb 11-12 · Robotesta</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "#34D399" }}>{doneCount}/{totalCount}</div>
+            <div style={{ fontSize: 10, color: "#A5B4FC" }}>completed</div>
+          </div>
+        </div>
+        <div style={{ background: "#1E293B", borderRadius: 8, height: 6, marginTop: 10, overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(90deg, #34D399, #06B6D4)", height: "100%", width: `${(doneCount/totalCount)*100}%`, borderRadius: 8, transition: "width 0.3s" }} />
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", overflowX: "auto", gap: 2, padding: "8px 8px 0", background: "#0F172A", position: "sticky", top: 88, zIndex: 99 }}>
+        {TABS.map((t, i) => (
+          <button key={t} onClick={() => setTab(i)} style={{
+            padding: "8px 12px", borderRadius: "8px 8px 0 0", border: "none", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap",
+            background: tab === i ? "#1E293B" : "transparent", color: tab === i ? "#60A5FA" : "#64748B"
+          }}>{t}{i === 5 && leads.length > 0 ? ` (${leads.length})` : ""}</button>
+        ))}
+      </div>
+
+      <div style={{ padding: "0 8px 120px" }}>
+        {/* Hit List */}
+        {tab === 0 && (
+          <div style={{ background: "#1E293B", borderRadius: "0 8px 8px 8px", padding: 12 }}>
+            <input placeholder="🔍 Search company or booth..." value={search} onChange={e => setSearch(e.target.value)}
+              style={{ width: "100%", padding: "10px 12px", background: "#0F172A", border: "1px solid #334155", borderRadius: 8, color: "#E2E8F0", fontSize: 14, marginBottom: 8, boxSizing: "border-box" }} />
+            <div style={{ display: "flex", gap: 4, overflowX: "auto", marginBottom: 12, paddingBottom: 4 }}>
+              {TEAM.map(t => (
+                <button key={t} onClick={() => setFilter(t)} style={{
+                  padding: "5px 10px", borderRadius: 20, border: "none", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
+                  background: filter === t ? "#3B82F6" : "#334155", color: filter === t ? "#fff" : "#94A3B8"
+                }}>{t}</button>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: "#64748B", marginBottom: 8 }}>
+              {hitFiltered.filter(h=>done[h.id]).length}/{hitFiltered.length} done · {filter !== "All" ? filter : "All team"}
+            </div>
+            {hitFiltered.map(h => (
+              <Card key={h.id} id={h.id} title={h.company} detail={h.why}
+                badges={[
+                  { text: h.booth, style: { background: "#1E3A5F", color: "#60A5FA", fontWeight: 600 } },
+                  { text: h.cat, style: { background: h.cat.includes("COMPETITOR") ? "#7F1D1D" : "#1E293B", color: h.cat.includes("COMPETITOR") ? "#FCA5A5" : "#94A3B8" } },
+                  { text: h.assigned, style: { color: "#7C3AED", fontWeight: 600, background: "transparent", padding: 0 } },
+                ]}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Investors */}
+        {tab === 1 && (
+          <div style={{ background: "#1E293B", borderRadius: "0 8px 8px 8px", padding: 12 }}>
+            <div style={{ fontSize: 11, color: "#64748B", marginBottom: 8 }}>{INVESTORS.filter(i=>done[i.id]).length}/{INVESTORS.length} done</div>
+            {INVESTORS.map(inv => (
+              <Card key={inv.id} id={inv.id} title={inv.company} actionText={inv.action}
+                badges={[
+                  { text: inv.tier, style: { background: TIER_COLORS[inv.tier] + "33", color: TIER_COLORS[inv.tier], fontWeight: 700 } },
+                  { text: inv.type, style: { color: "#64748B", background: "transparent", padding: 0 } },
+                  { text: inv.loc, style: { color: "#60A5FA", background: "transparent", padding: 0 } },
+                ]}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Government */}
+        {tab === 2 && (
+          <div style={{ background: "#1E293B", borderRadius: "0 8px 8px 8px", padding: 12 }}>
+            <div style={{ fontSize: 11, color: "#64748B", marginBottom: 8 }}>{GOVT.filter(g=>done[g.id]).length}/{GOVT.length} done</div>
+            {GOVT.map(g => (
+              <Card key={g.id} id={g.id} title={g.company} actionText={g.action}
+                badges={[
+                  { text: g.loc, style: { background: "#7C3AED33", color: "#A78BFA", fontWeight: 600 } },
+                  { text: g.owner, style: { color: "#7C3AED", fontWeight: 600, background: "transparent", padding: 0 } },
+                ]}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Accelerators */}
+        {tab === 3 && (
+          <div style={{ background: "#1E293B", borderRadius: "0 8px 8px 8px", padding: 12 }}>
+            <div style={{ fontSize: 11, color: "#64748B", marginBottom: 8 }}>{ACCELS.filter(a=>done[a.id]).length}/{ACCELS.length} done</div>
+            {ACCELS.map(a => (
+              <Card key={a.id} id={a.id} title={a.company} actionText={a.action}
+                badges={[
+                  { text: a.loc, style: { background: "#D4740E33", color: "#FB923C", fontWeight: 600 } },
+                  { text: a.inv, style: { color: "#22C55E", fontWeight: 600, background: "transparent", padding: 0 } },
+                ]}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Media */}
+        {tab === 4 && (
+          <div style={{ background: "#1E293B", borderRadius: "0 8px 8px 8px", padding: 12 }}>
+            <div style={{ fontSize: 11, color: "#64748B", marginBottom: 8 }}>{MEDIA.filter(m=>done[m.id]).length}/{MEDIA.length} done</div>
+            {MEDIA.map(m => (
+              <Card key={m.id} id={m.id} title={m.company} actionText={m.action}
+                badges={[
+                  { text: m.loc, style: { background: "#DC262633", color: "#F87171", fontWeight: 600 } },
+                  { text: m.reach, style: { color: "#64748B", background: "transparent", padding: 0 } },
+                ]}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Leads */}
+        {tab === 5 && (
+          <div style={{ background: "#1E293B", borderRadius: "0 8px 8px 8px", padding: 12 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#F1F5F9", marginBottom: 12 }}>➕ Quick Lead Capture</div>
+            {[
+              { key: "name", placeholder: "Name *" },
+              { key: "company", placeholder: "Company *" },
+              { key: "role", placeholder: "Role / Title" },
+              { key: "email", placeholder: "Email or Phone" },
+              { key: "next", placeholder: "Next step (e.g. Send pilot invite)" },
+            ].map(f => (
+              <input key={f.key} placeholder={f.placeholder} value={leadForm[f.key]} onChange={e => setLeadForm({ ...leadForm, [f.key]: e.target.value })}
+                style={{ width: "100%", padding: "10px 12px", background: "#0F172A", border: "1px solid #334155", borderRadius: 8, color: "#E2E8F0", fontSize: 14, marginBottom: 6, boxSizing: "border-box" }} />
+            ))}
+            <select value={leadForm.segment} onChange={e => setLeadForm({ ...leadForm, segment: e.target.value })}
+              style={{ width: "100%", padding: "10px 12px", background: "#0F172A", border: "1px solid #334155", borderRadius: 8, color: "#E2E8F0", fontSize: 14, marginBottom: 10, boxSizing: "border-box" }}>
+              {["Enterprise","Investor","Accelerator","Government","Media","Startup","Partner","Other"].map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <button onClick={addLead} style={{ width: "100%", padding: 12, background: "#22C55E", border: "none", borderRadius: 8, color: "#fff", fontSize: 15, fontWeight: 700 }}>💾 Save Lead</button>
+
+            {leads.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#F1F5F9", marginBottom: 8 }}>📋 Captured Leads ({leads.length})</div>
+                {leads.map(l => (
+                  <div key={l.id} style={{ background: "#0F172A", borderRadius: 8, padding: 10, marginBottom: 6, border: "1px solid #334155" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "#F1F5F9" }}>{l.name} <span style={{ fontWeight: 400, color: "#64748B" }}>@ {l.company}</span></div>
+                        <div style={{ fontSize: 11, color: "#94A3B8" }}>{l.role} · {l.email}</div>
+                        <div style={{ display: "flex", gap: 4, marginTop: 3 }}>
+                          <span style={{ fontSize: 10, background: "#3B82F633", color: "#60A5FA", padding: "1px 5px", borderRadius: 3 }}>{l.segment}</span>
+                          <span style={{ fontSize: 10, color: "#475569" }}>{l.time}</span>
+                        </div>
+                        {l.next && <div style={{ fontSize: 11, color: "#FCD34D", marginTop: 3 }}>→ {l.next}</div>}
+                      </div>
+                      <button onClick={() => removeLead(l.id)} style={{ background: "none", border: "none", color: "#EF4444", fontSize: 16, padding: 4 }}>✕</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
